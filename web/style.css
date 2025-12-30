@@ -1,0 +1,360 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@200..900&display=swap');
+
+:root {
+  --color-default: #BFFF74;
+  --color-hover: #BFFF74;
+  --color-branch: #BFFF74;
+  --color-branch-hover: #BFFF74;
+  --color-bg: #101010;
+  --color-bg-hover: #181F00;
+  --animation-duration: 0.5s;
+}
+
+body {
+  visibility: hidden;
+  user-select: none;
+  white-space: nowrap;
+  margin: 0;
+  overflow: hidden;
+}
+
+p {
+  margin: 0;
+}
+
+/* Options wrapper - positioned to grow upward from center */
+#options-wrapper {
+  position: absolute;
+  bottom: calc(50% + 6pt);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0;
+}
+
+/* Hide wrapper during setup to prevent flickering */
+#options-wrapper.preparing {
+  visibility: hidden;
+}
+
+/* Trunk - SVG vertical line going up from center */
+#trunk {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  overflow: visible;
+}
+
+/* Hide trunk during preparation to prevent animation restart flicker */
+#trunk.preparing {
+  visibility: hidden;
+}
+
+#trunk line {
+  stroke: var(--color-branch);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  vector-effect: non-scaling-stroke;
+  will-change: stroke-dashoffset;
+}
+
+#trunk.animate line {
+  animation: drawTrunk var(--animation-duration) ease-out forwards;
+}
+
+@keyframes drawTrunk {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Dot at the bottom of trunk */
+#trunk-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-branch);
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 101;
+}
+
+#trunk-dot.animate {
+  animation: fadeInDot var(--animation-duration) ease-out forwards;
+}
+
+@keyframes fadeInDot {
+  to { opacity: 1; }
+}
+
+/* Option rows - CSS Grid for proper center alignment */
+.option-row {
+  display: grid;
+  grid-template-columns: 1fr 0 1fr;
+  align-items: center;
+  position: relative;
+  pointer-events: auto;
+  min-height: 32pt;
+  margin: 4pt 0;
+  width: 100%;
+}
+
+/* Center column - trunk passes through here (0 width for perfect centering) */
+.option-row-center {
+  width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Left side container - content aligned to the right (toward center/trunk) */
+.option-row-left {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Right side container - content aligned to the left (toward center/trunk) */
+.option-row-right {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Branch wrapper - horizontal: option and connector side by side */
+.branch {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.branch-left {
+  flex-direction: row;
+}
+
+.branch-right {
+  flex-direction: row;
+}
+
+/* Wrapper for branch connectors - clips the SVG at the trunk line */
+.branch-connector-wrapper {
+  width: 20pt;
+  height: 28pt;
+  overflow: visible;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Left connector wrapper - clips right edge to hide anything past center, but allows bottom overflow */
+.branch-connector-wrapper-left {
+  clip-path: inset(0 1px -10pt 0);
+}
+
+/* Right connector wrapper - clips left edge to hide anything past center, but allows bottom overflow */
+.branch-connector-wrapper-right {
+  clip-path: inset(0 0 -10pt 1px);
+}
+
+/* SVG Branch connectors - curved paths */
+.branch-connector {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+
+.branch-connector path {
+  fill: none;
+  stroke: var(--color-branch);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke 0.3s ease;
+  vector-effect: non-scaling-stroke;
+  will-change: stroke-dashoffset;
+}
+
+.branch-connector path.animate {
+  animation: drawBranch var(--animation-duration) ease-out forwards;
+}
+
+@keyframes drawBranch {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Option container */
+.option-container {
+  color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-family: "Unbounded", sans-serif;
+  background: var(--color-bg);
+  border: 1px solid rgba(191, 255, 116, 0.25);
+  border-radius: 3pt;
+  font-weight: 200;
+  line-height: 24pt;
+  height: 28pt;
+  width: max-content;
+  padding: 2pt 6pt;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(10pt);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  will-change: opacity, transform;
+  contain: layout style;
+}
+
+.option-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-bg-hover);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 0;
+}
+
+.option-container:hover::before {
+  opacity: 1;
+}
+
+.option-container:hover {
+  border-color: rgba(191, 255, 116, 1);
+}
+
+.option-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+.option-container.animate {
+  animation: slideInLeft var(--animation-duration) ease-out forwards;
+}
+
+.branch-left .option-container {
+  flex-direction: row-reverse;
+  padding: 2pt 6pt;
+  transform: translateX(-10pt);
+}
+
+.branch-left .option-container.animate {
+  animation: slideInRight var(--animation-duration) ease-out forwards;
+}
+
+@keyframes slideInLeft {
+  0% { opacity: 0; transform: translateX(10pt); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  0% { opacity: 0; transform: translateX(-10pt); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.option-container:hover {
+  transform: translateX(-3pt);
+}
+
+.branch-left .option-container:hover {
+  transform: translateX(3pt);
+}
+
+.branch:hover .branch-connector path {
+  stroke: var(--color-branch-hover);
+}
+
+/* Icon box */
+.option-icon {
+  width: 11pt;
+  height: 11pt;
+  margin: 0 5pt;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-default);
+  font-size: 8pt;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.option-label {
+  font-weight: 300;
+  padding: 0 3pt;
+  font-size: 8.5pt;
+  white-space: nowrap;
+}
+
+/* Single option (centered) */
+.option-row.single-option {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.option-row.single-option .branch-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.option-row.single-option .option-container {
+  background: var(--color-bg);
+  justify-content: center;
+  padding: 0 10pt;
+  width: max-content;
+  min-width: 100pt;
+  transform: translateY(5pt);
+}
+
+.option-row.single-option .option-container.animate {
+  animation: slideInUp var(--animation-duration) ease-out forwards;
+}
+
+@keyframes slideInUp {
+  0% { opacity: 0; transform: translateY(8pt); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.option-row.single-option .option-container:hover {
+  transform: translateY(-2pt);
+}
+
+/* Vertical connector for single/center items */
+.vertical-connector {
+  width: 2pt;
+  height: 5pt;
+  overflow: visible;
+}
+
+.vertical-connector line {
+  stroke: var(--color-branch);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  vector-effect: non-scaling-stroke;
+  will-change: stroke-dashoffset;
+}
+
+.vertical-connector line.animate {
+  animation: drawVertical var(--animation-duration) ease-out forwards;
+}
+
+@keyframes drawVertical {
+  to { stroke-dashoffset: 0; }
+}
